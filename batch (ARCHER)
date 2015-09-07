@@ -1,0 +1,16 @@
+#/bin/bash --login
+
+#PBS -l select=13
+#PBS -l walltime=03:30:00
+#PBS -S /bin/bash
+#PBS -A e01-JWK2015
+#PBS -q standard
+
+export PBS_O_WORKDIR=$(readlink -f $PBS_O_WORKDIR)
+cd $PBS_O_WORKDIR
+
+lfs setstripe -c -1 $work/ati/data
+lfs setstripe -c -1 $work/ati/misc
+
+export OMP_NUM_THREADS=1
+aprun -n 312 run.exe > display
