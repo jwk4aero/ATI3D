@@ -9,9 +9,6 @@
 
 !===== CONSTANT PARAMETERS
 
- integer,parameter :: int16=selected_int_kind(4),int32=selected_int_kind(9),int64=selected_int_kind(18)
- integer,parameter :: ieee32=selected_real_kind(6,37),ieee64=selected_real_kind(15,307)
- integer,parameter :: sp=ieee32,dp=ieee64
 
  integer(kind=int32),parameter :: ntdrv=0,ntflt=1,nrall=0,nrone=1,n45no=0,n45go=1
  integer(kind=int32),parameter :: lmd=11,lmf=8,lmp=max(lmd,lmf),mfbi=2,mbci=3
@@ -151,7 +148,7 @@
 
  integer(kind=int32),dimension(:,:),allocatable :: ista
  integer(kind=int32),dimension(:),allocatable :: ireq
- integer(kind=int32) :: ir,mpro,npro,myid,itag,info,icom,ierr
+ integer(kind=int32) :: ir,mpro,npro,myid,itag,info,icom,ierr,icode
 
 !=====
 #ifdef SUBSPACES

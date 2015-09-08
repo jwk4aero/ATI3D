@@ -1,9 +1,3 @@
-#ifdef FOPEN_NOT_BINARY
-#define OPENFILEFORM 'unformatted'
-#else ! not FOPEN_NOT_BINARY
-#define OPENFILEFORM 'binary'
-#endif ! not FOPEN_NOT_BINARY
-
 #ifdef FOPEN_NOT_SHARED
 #define OPENFILESHARED
 #else ! not FOPEN_NOT_SHARED
@@ -359,7 +353,7 @@
     call makegrid
     call MPI_BARRIER(icom,ierr)
 
-    open(9,file=cgrid,access='stream',form=OPENFILEFORM OPENFILESHARED)
+    open(9,file=cgrid,access='stream',form='unformatted' OPENFILESHARED)
     lp=lpos(myid)
  do nn=1,3; lq=(nn-1)*ltomb
  do k=0,lze; do j=0,let; l=indx3(0,j,k,1)
@@ -515,7 +509,7 @@
     n=0; ndt=0; dt=0; dts=0; dte=0; timo=0
     call initialo
  else
-    open(9,file=crestart,access='stream',form=OPENFILEFORM OPENFILESHARED); lh=0
+    open(9,file=crestart,access='stream',form='unformatted' OPENFILESHARED); lh=0
     read(9,pos=8*lh+1) n; lh=lh+1
     read(9,pos=8*lh+1) ndt; lh=lh+1
     read(9,pos=8*lh+1) dt; lh=lh+1
@@ -542,7 +536,7 @@
     open(1,file='signal.dat'); close(1,status='delete')
  end if
     call MPI_BARRIER(icom,ierr)
-    open(1,file='signal.dat',access='direct',form='formatted',recl=16,shared)
+    open(1,file='signal.dat',access='direct',form='formatted',recl=16 OPENFILESHARED)
 
     ndati=-1; nsigi=-1; dtsum=0
  do while(timo-tmax<0.and.(dt/=0.or.n<=2))
@@ -926,7 +920,7 @@
     open(9,file=crestart); close(9,status='delete')
  end if
     call MPI_BARRIER(icom,ierr)
-    open(9,file=crestart,access='stream',form=OPENFILEFORM OPENFILESHARED); lh=0
+    open(9,file=crestart,access='stream',form='unformatted' OPENFILESHARED); lh=0
  if(myid==mo(mb)) then
     write(9,pos=8*lh+1) n; lh=lh+1
     write(9,pos=8*lh+1) ndt; lh=lh+1

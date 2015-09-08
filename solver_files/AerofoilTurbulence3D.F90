@@ -26,7 +26,7 @@
  real(kind=dp),dimension(0:1) :: tl0,tl1,tlw
  real(kind=dp) :: smgrid,domlen,span,wlew,wlea,szth1,szth2,szxt,szco
  real(kind=dp) :: tgusto,eps,ck1,ck2,ck3,amp1,amp2,amp3,vk1,vk2,slit,gaus,cfit,tla,tlb,cutlb
- real(kind=dp) :: denxit
+ real(kind=dp) :: denxit,cf1,cf2,uu,expn,xcore
 
  contains
 
@@ -196,7 +196,11 @@
         do ll=0,ltz; l=de(ll,5); lctz(ll)=l
             vit(ll,:)=ss(l,:)
         end do
-        fctr=slit/(ntz*uoo(1)); tt(:)=fctr*(/0:ntz/); vito(:,:,:)=0
+        fctr=slit/(ntz*uoo(1))
+        do l=0,ntz
+            tt(l)=fctr*l
+        end do
+        vito(:,:,:)=0
         if(nito==0) then
             do nn=1,nits
                 ve(:)=(-9+mxc(nn))*sit(nn,:)*sit(nn,:); ra1=-36-60*mxc(nn); ra2=2*mxc(nn)/3.0
