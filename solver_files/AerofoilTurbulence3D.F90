@@ -24,7 +24,8 @@
  real(kind=dp),dimension(0:1,3) :: szr,szp
  real(kind=dp),dimension(3,0:1) :: tam
  real(kind=dp),dimension(0:1) :: tl0,tl1,tlw
- real(kind=dp) :: smgrid,domlen,span,wlew,wlea,szth1,szth2,szxt,szco
+ real(kind=dp),dimension(4) :: domlen
+ real(kind=dp) :: smgrid,span,wlew,wlea,szth1,szth2,szxt,szco
  real(kind=dp) :: tgusto,eps,ck1,ck2,ck3,amp1,amp2,amp3,vk1,vk2,slit,gaus,cfit,tla,tlb,cutlb
  real(kind=dp) :: denxit,cf1,cf2,uu,expn,xcore
 
@@ -45,7 +46,7 @@
      read(9,*) cinput,npc(:,2)
      read(9,*) cinput,npc(:,3)
      read(9,*) cinput,nito,nits,litr
-     read(9,*) cinput,smgrid,domlen
+     read(9,*) cinput,smgrid,domlen(:)
      read(9,*) cinput,span,wlew,wlea
      read(9,*) cinput,szth1,szth2,szxt,szco
      read(9,*) cinput,tgusto
@@ -95,13 +96,13 @@
          ait(nn,m)=res*tam(m,mxc(nn))*(2*ait(nn,m)-1)*sit(nn,m)**1.5
      end do; end do
      denxit=slit/(2*sum(ran(:,1)))
-     xit(1)=-domlen+half*(szth1+slit)-denxit*ran(1,1)
+     xit(1)=-domlen(1)+half*(szth1+slit)-denxit*ran(1,1)
      do nn=2,nits
          xit(nn)=xit(nn-1)-denxit*(ran(nn-1,1)+ran(nn,1))
      end do
      do nn=1,nits
          res=3*span-2*max(ran(nn,1),ran(nn,2),ran(nn,3))
-!    xit(nn)=-domlen+half*(szth1+slit)-slit*xit(nn)
+!    xit(nn)=-domlen(1)+half*(szth1+slit)-slit*xit(nn)
          yit(nn)=(1-cutlb)*ran(nn,2)*(2*yit(nn)-1)
          zit(nn)=min(span,res)*(zit(nn)-half)
       end do
@@ -155,18 +156,18 @@
          if(nbcs(nn)==10) then; nsz(0,nn)=1; else; nsz(0,nn)=0; end if
          if(nbce(nn)==10) then; nsz(1,nn)=1; else; nsz(1,nn)=0; end if
          select case(nn)
-             case(1); szr(0,nn)=1/szth1; szp(0,nn)=-domlen+szth1; szr(1,nn)=1/(szth1+szxt); szp(1,nn)=domlen-szth1
-             case(2); szr(0,nn)=1/szth2; szp(0,nn)=-domlen+szth2; szr(1,nn)=1/szth2; szp(1,nn)=domlen-szth2
-             case(3); szr(0,nn)=0; szp(0,nn)=0; szr(1,nn)=0; szp(1,nn)=0
+            case(1); szr(0,nn)=1/szth1; szp(0,nn)=-domlen(1)+szth1; szr(1,nn)=1/(szth1+szxt); szp(1,nn)=domlen(2)-szth1
+            case(2); szr(0,nn)=1/szth2; szp(0,nn)=-domlen(3)+szth2; szr(1,nn)=1/szth2; szp(1,nn)=domlen(4)-szth2
+            case(3); szr(0,nn)=0; szp(0,nn)=0; szr(1,nn)=0; szp(1,nn)=0
          end select
      end do
 
-     ll=-1; ra2=pi/(2*domlen); ra3=pi/szth1
+     ll=-1; ra2=pi/(domlen(1)+domlen(2)); ra3=pi/szth1
      do l=0,lmx
          rr(l,:)=nsz(0,:)*szr(0,:)*max(szp(0,:)-ss(l,:),zero)+nsz(1,:)*szr(1,:)*max(ss(l,:)-szp(1,:),zero)
          de(l,1)=szco*(1-0.125*(1+cos(pi*rr(l,1)))*(1+cos(pi*rr(l,2)))*(1+cos(pi*rr(l,3))))
-         de(l,2)=half*(1+cos(ra2*(min(ss(l,1),domlen)+domlen)))
-         de(l,3)=sin(ra3*min(ss(l,1)+domlen,szth1))**2
+         de(l,2)=half*(1+cos(ra2*(min(ss(l,1),domlen(1))+domlen(2))))
+         de(l,3)=sin(ra3*min(ss(l,1)+domlen(2),szth1))**2
          if(de(l,1)-sml>0) then
              ll=ll+1; de(ll,5)=l+sml
          end if
@@ -187,7 +188,6 @@
             ll=ll+1; de(ll,5)=l+sml
          end if
      end do
-#endif ! INFLOW_TURB
 
 
      ltz=ll; ntz=litr*slit/tla
@@ -236,11 +236,10 @@
         end if
      end if
 
-#ifndef INFLOW_TURB
      if(myid==mo(3)) then
         fctr=one/lze0
         do l=0,lze0
-            ra1=-domlen; ra2=0; ra3=(-half+l*fctr)*span
+            ra1=-domlen(1); ra2=0; ra3=(-half+l*fctr)*span
             iit(l)=minloc((vit(:,1)-ra1)**2+(vit(:,2)-ra2)**2+(vit(:,3)-ra3)**2,1)-1
         end do
         open(9,file='inflowsignal.dat',status='replace',access='direct',form= 'unformatted' ,recl=16)
@@ -269,7 +268,7 @@
      itag=1; fctr=one/lze0
      do l=0,lze0
          if(l==0) then
-            ra1=0; ra2=domlen-szth2; ra3=0
+            ra1=0; ra2=domlen(3)-szth2; ra3=0
          else
             ra1=-half; ra2=0; ra3=(-half+l*fctr)*span
          end if
@@ -290,7 +289,7 @@
 
      ra1=1/vk1; ra2=-half*ra1**2
      do m=0,1
-         mm=m*domlen-half*domlen
+         mm=m*domlen(1)-half*domlen(1)
 
          de(:,2)=ra1*ss(:,2)
          de(:,3)=-ra1*(ss(:,1)+mm)
@@ -330,45 +329,51 @@
 
  subroutine spongego
 
- if(ltz/=-1) then
-    vit(:,:)=0
- if(timo-tgusto+dtk>0) then
-    ra0=timo-tgusto+dtk; ra1=slit/uoo(1); ra2=ra0/ra1; ra3=ra0-ra1*int(ra2)
-    is=0; ie=ntz; ii=minloc(abs(tt(:)-ra3),1)-1
- do jj=-2,2
-    ilag(jj)=min(max(ii+jj,is),ie); tlag(jj)=tt(ilag(jj))
- end do
-    if(ii-is==0) then; ilag(-2:-1)=(/ie-2,ie-1/); tlag(-2:-1)=tt(ilag(-2:-1))-ra1; end if
-    if(ii-is==1) then; ilag(-2)=ie-1; tlag(-2)=tt(ilag(-2))-ra1; end if
-    if(ie-ii==1) then; ilag(2)=is+1; tlag(2)=tt(ilag(2))+ra1; end if
-    if(ie-ii==0) then; ilag(1:2)=(/is+1,is+2/); tlag(1:2)=tt(ilag(1:2))+ra1; end if
-    alag(:)=ra3-tlag(:); fctr=sin(pi*min(0.1*ra0,half))**2
- do jj=-2,2
-    blag(:)=tlag(jj)-tlag(:); ao=fctr; bo=1
- do ii=-2,2
- if(ii/=jj) then
-    ao=ao*alag(ii); bo=bo*blag(ii)
- end if
- end do
-    ii=ilag(jj); res=ao/bo
-    vit(:,:)=vit(:,:)+res*vito(:,ii,:)
- end do
- end if
- end if
+#ifdef  INFLOW_TURB
+     if(ltz/=-1) then
+         vit(:,:)=0
+         if(timo-tgusto+dtk>0) then
+             ra0=timo-tgusto+dtk; ra1=slit/uoo(1); ra2=ra0/ra1; ra3=ra0-ra1*int(ra2)
+             is=0; ie=ntz; ii=minloc(abs(tt(:)-ra3),1)-1
+             do jj=-2,2
+                ilag(jj)=min(max(ii+jj,is),ie); tlag(jj)=tt(ilag(jj))
+             end do
+             if(ii-is==0) then; ilag(-2:-1)=(/ie-2,ie-1/); tlag(-2:-1)=tt(ilag(-2:-1))-ra1; end if
+             if(ii-is==1) then; ilag(-2)=ie-1; tlag(-2)=tt(ilag(-2))-ra1; end if
+             if(ie-ii==1) then; ilag(2)=is+1; tlag(2)=tt(ilag(2))+ra1; end if
+             if(ie-ii==0) then; ilag(1:2)=(/is+1,is+2/); tlag(1:2)=tt(ilag(1:2))+ra1; end if
+             alag(:)=ra3-tlag(:); fctr=sin(pi*min(0.1*ra0,half))**2
+             do jj=-2,2
+                 blag(:)=tlag(jj)-tlag(:); ao=fctr; bo=1
+                 do ii=-2,2
+                 if(ii/=jj) then
+                    ao=ao*alag(ii); bo=bo*blag(ii)
+                 end if
+                 end do
+                 ii=ilag(jj); res=ao/bo
+                 vit(:,:)=vit(:,:)+res*vito(:,ii,:)
+             end do
+         end if
+     end if
+#endif !  INFLOW_TURB
 
- do ll=0,lsz; l=lcsz(ll)
-    rr(l,:)=0
- end do
- do ll=0,ltz; l=lctz(ll)
-    rr(l,:)=csz(ll)*vit(ll,:)
- end do
-    fctr=half*gamm1
- do ll=0,lsz; l=lcsz(ll)
-    res=(1-fctr*(rr(l,1)**2+rr(l,2)**2+rr(l,3)**2))**hamm1
-    de(l,1)=de(l,1)+asz(ll)*(qa(l,1)-res)
-    de(l,2:4)=de(l,2:4)+asz(ll)*(qa(l,2:4)-qa(l,1)*rr(l,:))
-    de(l,5)=de(l,5)+bsz(ll)*(p(l)-poo)
- end do
+     do ll=0,lsz; l=lcsz(ll)
+        rr(l,:)=0
+     end do
+
+#ifdef  INFLOW_TURB
+     do ll=0,ltz; l=lctz(ll)
+        rr(l,:)=csz(ll)*vit(ll,:)
+     end do
+#endif !  INFLOW_TURB
+
+     fctr=half*gamm1
+     do ll=0,lsz; l=lcsz(ll)
+        res=(1-fctr*(rr(l,1)**2+rr(l,2)**2+rr(l,3)**2))**hamm1
+        de(l,1)=de(l,1)+asz(ll)*(qa(l,1)-res)
+        de(l,2:4)=de(l,2:4)+asz(ll)*(qa(l,2:4)-qa(l,1)*rr(l,:))
+        de(l,5)=de(l,5)+bsz(ll)*(p(l)-poo)
+     end do
 
  end subroutine spongego
 

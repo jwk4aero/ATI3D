@@ -35,13 +35,14 @@
  subroutine gridaerofoil(ngridv,nthick,litr,smgrid,domlen,span,wlew,wlea,szth1,szth2,szxt,tla,tlb,cutlb)
 
      integer(kind=int32),intent(in) :: ngridv,nthick,litr
-     real(kind=dp),intent(in) :: smgrid,domlen,span,wlew,wlea,szth1,szth2,szxt,tla,tlb,cutlb
+     real(kind=dp),intent(in) :: smgrid,span,wlew,wlea,szth1,szth2,szxt,tla,tlb,cutlb
+     real(kind=dp),dimension(4),intent(in) :: domlen
 
      lxit=lxi0+lxi1+lxi2+2; lett=2*let0+1
      lxie0=lxi0; lxis1=lxie0+1; lxie1=lxis1+lxi1; lxis2=lxie1+1
      lete0=let0; lets1=lete0+1
 
-     rs=nthick*domlen/(domlen+3); re=0
+     rs=nthick*domlen(3)/(domlen(3)+3); re=0
      shs=smgrid; she=shs
 
      allocate(xx(0:lxit,0:lett),yy(0:lxit,0:lett),zz(0:lxit,0:lett),zs(0:lze0))
@@ -57,8 +58,8 @@
          do k=0,lze0
              zs(k)=span*(real(lze0-k,kind=dp)/lze0-half)
 
-             xa=-domlen; xb=-half+wlea*sin(2*pi*(zs(k)-zs(0))/wlew); xc=half; xd=domlen-szth1; xe=domlen+szxt
-             ya=-domlen; yb=0; yc=0; yd=domlen
+             xa=-domlen(1); xb=-half+wlea*sin(2*pi*(zs(k)-zs(0))/wlew); xc=half; xd=domlen(2)-szth1; xe=domlen(2)+szxt
+             ya=-domlen(3); yb=0; yc=0; yd=domlen(4)
 
              fctr=2*pi/wlew; shswle=shs*sqrt(1+0*(fctr*wlea*cos(fctr*(zs(k)-zs(0))))**2)
 
