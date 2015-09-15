@@ -577,6 +577,13 @@
     de(:,5)=gam*p(:)*de(:,1)
     ss(:,1)=srefp1dre*de(:,5)**1.5/(de(:,5)+srefoo)
 
+#ifdef SUBSPACES
+ if(nk.eq.1) then
+    ! write subspaces
+    call subspace_write_data(n,0)
+    if(myid.eq.0) write(*,*) 'Subspaces at timestep ',n,' and time ',timo,' written!'
+endif
+#endif ! SUBSPACES
 !----- DETERMINATION OF TIME STEP SIZE & OUTPUT TIME
 
  if(nk==1) then
