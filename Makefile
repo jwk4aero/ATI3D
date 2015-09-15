@@ -118,8 +118,8 @@ iridis-intel:
 		"CPP=/lib/cpp" \
 		"CPPFLAGS=-P -traditional " \
 		"FC=mpiifort"\
-		"FFLAGS= -r8 -O3 -heap-arrays" \
-		"LFLAGS=-O3" \
+		"FFLAGS= -r8 -O3 -heap-arrays -module $(BUILDOBJ)" \
+		"LFLAGS=-O3 -I $(BUILDOBJ)" \
 		"LIBS=-L/lib -mkl -I$(FFTW_INC_DIR) " \
 		"LIBS2=-L$(HOME)/lib -lstdc++ -lm "
 
@@ -148,7 +148,7 @@ test:
 		"CPP=/lib/cpp" \
 		"CPPFLAGS=-P -traditional -I/usr/include" \
 		"FC=mpif90 -fcray-pointer"\
-		"FFLAGS= -O3" \
+		"FFLAGS= -O3 -J$(BUILDOBJ) " \
 		"LFLAGS=-O3 " \
 		"LIBS=-L/lib -llapack" \
 		"LIBS2=-L$(HOME)/lib -lstdc++ -lfftw3 -lm "
@@ -402,7 +402,7 @@ $(BUILDDIR)/%.f90 :  $(SRCSOL)/%.F90
 	$(CPP) $(CPPFLAGS) $(OPTIONS) $(OPTIONS2) -Wno-endif-labels $(SRCSOL)/$*.F90 $(BUILDDIR)/$*.f90 
 
 $(BUILDOBJ)/%.o :  $(BUILDDIR)/%.f90
-	$(FC) $(FFLAGS) -c -o $(BUILDOBJ)/$*.o $(BUILDDIR)/$*.f90 -J$(BUILDOBJ)
+	$(FC) $(FFLAGS) -c -o $(BUILDOBJ)/$*.o $(BUILDDIR)/$*.f90 
 
 GRID:	$(OBJECTS_GRID)
 	$(FC) $(LFLAGS)  -o $(EXE) $(OBJECTS_GRID) $(LIBS) $(LIBS2) $(LIBS3) 
