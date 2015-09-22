@@ -353,6 +353,7 @@
     call makegrid
     call MPI_BARRIER(icom,ierr)
 
+#ifdef GRID_STREAM
     open(9,file=cgrid,access='stream',form='unformatted' OPENFILESHARED)
     lp=lpos(myid)
  do nn=1,3; lq=(nn-1)*ltomb
@@ -360,6 +361,39 @@
     read(9,pos=8*(lp+lq+lio(j,k))+1) ss(l:l+lxi,nn)
  end do; end do
  end do
+#else ! not GRID_STREAM
+    open(9,file=cgrid,access='direct',recl=8,form='unformatted' )
+             npj = letmb(mb)+1
+             npi = lximb(mb)+1
+             npk = lze0+1
+             do k=0,lze
+             do j=0,let
+             do i=0,lxi
+                reclen = (k+ kbegin(sz)-1 )*npj*npi + (j+jbegin(sy)-1)*npi + i+ibegin(sx)
+                 l=indx3(i,j,k,1)
+                 read(9,rec=reclen) ss(l,1)
+             end do
+             end do
+             end do
+             do k=0,lze
+             do j=0,let
+             do i=0,lxi
+                reclen = npk*npj*npi + (k+ kbegin(sz) -1)*npj*npi + (j+jbegin(sy)-1)*npi + i+ibegin(sx)
+                 l=indx3(i,j,k,1)
+                 read(9,rec=reclen) ss(l,2)
+             end do
+             end do
+             end do
+             do k=0,lze
+             do j=0,let
+             do i=0,lxi
+                reclen = 2*npk*npj*npi + (k+ kbegin(sz) -1)*npj*npi + (j+jbegin(sy)-1)*npi + i+ibegin(sx)
+                 l=indx3(i,j,k,1)
+                 read(9,rec=reclen) ss(l,3)
+             end do
+             end do
+             end do
+#endif ! not GRID_STREAM
     close(9)
     call MPI_BARRIER(icom,ierr)
  if(myid==mo(mb)) then

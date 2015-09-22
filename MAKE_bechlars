@@ -1,4 +1,4 @@
-EXE	= $(HOME)/Postdoc/RUN/test
+EXE	= $(HOME)/Postdoc/RUN_2/test
 
 OPTIONS = 
 OPTIONS += -DFOPEN_NOT_SHARED

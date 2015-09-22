@@ -37,6 +37,7 @@
      integer(kind=int32),intent(in) :: ngridv,nthick,litr
      real(kind=dp),intent(in) :: smgrid,span,wlew,wlea,szth1,szth2,szxt,tla,tlb,cutlb
      real(kind=dp),dimension(4),intent(in) :: domlen
+     integer(kind=int64) reclen,npi,npj,npk
 
      lxit=lxi0+lxi1+lxi2+2; lett=2*let0+1
      lxie0=lxi0; lxis1=lxie0+1; lxie1=lxis1+lxi1; lxis2=lxie1+1
@@ -53,7 +54,11 @@
 
      if(myid==mo(mb)) then
          open(9,file=cgrid); close(9,status='delete')
+#ifdef GRID_STREAM
          open(9,file=cgrid,access='stream',form='unformatted')
+#else ! not GRID_STREAM
+         open(9,file=cgrid,access='direct',recl=8,form='unformatted')
+#endif ! not GRID_STREAM
 
          do k=0,lze0
              zs(k)=span*(real(lze0-k,kind=dp)/lze0-half)
@@ -232,10 +237,36 @@
              select case(mb)
              case(0,3); is=0; ie=lxie0; case(1,4); is=lxis1; ie=lxie1; case(2,5); is=lxis2; ie=lxit
              end select
+
+#ifdef GRID_STREAM
              np=8*(je-js+1)*(ie-is+1)
              write(9,pos=np*k+1) ((xx(i,j),i=is,ie),j=js,je)
              write(9,pos=np*(k+lze0+1)+1) ((yy(i,j),i=is,ie),j=js,je)
              write(9,pos=np*(k+2*lze0+2)+1) ((zz(i,j),i=is,ie),j=js,je)
+#else ! not GRID_STREAM
+             npi=(ie-is+1)
+             npj=(je-js+1)
+             npk=lze0+1
+
+             do j=1,npj
+             do i=1,npi
+                 reclen = (k)*npj*npi + (j-1)*npi + i
+                 write(9,rec= reclen) xx(i+is-1,j+js-1)
+             enddo
+             enddo
+             do j=1,npj
+             do i=1,npi
+                 reclen = npk*npj*npi + (k)*npj*npi + (j-1)*npi + i
+                 write(9,rec= reclen) yy(i+is-1,j+js-1)
+             enddo
+             enddo
+             do j=1,npj
+             do i=1,npi
+                 reclen =  2*npk*npj*npi + (k)*npj*npi + (j-1)*npi + i
+                 write(9,rec=reclen) zz(i+is-1,j+js-1)
+             enddo
+             enddo
+#endif ! not GRID_STREAM
          end do
 
          close(9)

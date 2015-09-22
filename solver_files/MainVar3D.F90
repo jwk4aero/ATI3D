@@ -114,6 +114,7 @@
  integer(kind=int32) :: m,ma,mb,mm,mp,mq,mbk,mps,mpe,n,ndt,nn,nk,ns,ne,np,nt,nz,ndati,nsigi,nout,nfile
  integer(kind=int32) :: nts,nscrn,nsgnl,ndata,nviscous,nkrk,nsmf,nfskp,nrestart
  integer(kind=int64) :: nlmx,llmb,llmo,lis,lie,ljs,lje
+ integer(kind=int64) :: reclen,npi,npj,npk
 
  real(kind=dp),dimension(0:lmp,0:1,0:1) :: pbci,pbco
  real(kind=dp),dimension(-2:2,0:2,0:1) :: albed,albef
