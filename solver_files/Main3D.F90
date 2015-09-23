@@ -90,7 +90,7 @@
         if(myid>=mo(mm)) then; mb=mm; end if
      end do
 
-#ifdef BLOCK_INFO
+#ifndef NO_BLOCK_INFO
 !cpb create communicator for each block respectively
      call MPI_COMM_SPLIT( icom , mb , myid , block_comm , ierr )
      if (ierr .ne. 0) then
@@ -98,7 +98,7 @@
          call MPI_Abort(MPI_COMM_WORLD,icode,ierr)
          stop 'Abort due to error in MPI_COMM_SPLIT!'
      endif
-#endif ! BLOCK_INFO
+#endif ! not NO_BLOCK_INFO
 
      !set number of point of current block
      lxio=lximb(mb); leto=letmb(mb); lzeo=lzemb(mb)
@@ -133,12 +133,12 @@
      ip=mod(myid-mo(mb),npc(mb,1))
      jp=mod((myid-mo(mb))/npc(mb,1),npc(mb,2))
      kp=mod((myid-mo(mb))/(npc(mb,1)*npc(mb,2)),npc(mb,3))
-#ifdef BLOCK_INFO
+#ifndef NO_BLOCK_INFO
      !store process coordinates (sx,sy,sz) per block
      sx=ip
      sy=jp
      sz=kp
-#endif ! BLOCK_INFO
+#endif ! not NO_BLOCK_INFO
 
      ! set neighboring process for communication
      ! i-direction
@@ -256,7 +256,7 @@
          end do; end do; end do
      end do
 
-#ifdef BLOCK_INFO
+#ifndef NO_BLOCK_INFO
  !cpb store start indices of process in block
  allocate(ibegin(0:npc(mb,1)))
  allocate(jbegin(0:npc(mb,2)))
@@ -280,7 +280,7 @@
    mp=mo(mb)+k*npc(mb,1)*npc(mb,2)
    kbegin(k)=kbegin(k-1)+lzem(mp-1)+1
  end do
-#endif ! BLOCK_INFO
+#endif ! not NO_BLOCK_INFO
 
 !===== ALLOCATION OF MAIN ARRAYS
 
@@ -354,6 +354,7 @@
     call MPI_BARRIER(icom,ierr)
 
 #ifdef GRID_STREAM
+!cpb original temporary grid storage
     open(9,file=cgrid,access='stream',form='unformatted' OPENFILESHARED)
     lp=lpos(myid)
  do nn=1,3; lq=(nn-1)*ltomb
@@ -362,10 +363,17 @@
  end do; end do
  end do
 #else ! not GRID_STREAM
+!cpb new temporary grid storage
     open(9,file=cgrid,access='direct',recl=8,form='unformatted' )
+             !the coordinates are written in three blocks for x, y and z
+             !and respectively in an ijk-order
+
+             !get number of point per direction per process
              npj = letmb(mb)+1
              npi = lximb(mb)+1
              npk = lze0+1
+
+             !read x-coordinate
              do k=0,lze
              do j=0,let
              do i=0,lxi
@@ -375,6 +383,8 @@
              end do
              end do
              end do
+
+             !read x-coordinate
              do k=0,lze
              do j=0,let
              do i=0,lxi
@@ -384,6 +394,8 @@
              end do
              end do
              end do
+
+             !read x-coordinate
              do k=0,lze
              do j=0,let
              do i=0,lxi

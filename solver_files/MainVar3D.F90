@@ -156,12 +156,12 @@
  integer(kind=int32) ioflag,ncapt
 #endif SUBSPACES
 
-#ifdef BLOCK_INFO
+#ifndef NO_BLOCK_INFO
 !cpb create communicator for each block respectively
  integer(kind=int32) :: block_comm
  integer(kind=int32) :: sx,sy,sz
  integer(kind=int32),dimension(:), allocatable :: ibegin,jbegin,kbegin
-#endif ! BLOCK_INFO
+#endif ! not NO_BLOCK_INFO
 
  end module mainvar3d
 

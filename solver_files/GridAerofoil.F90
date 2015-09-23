@@ -55,8 +55,10 @@
      if(myid==mo(mb)) then
          open(9,file=cgrid); close(9,status='delete')
 #ifdef GRID_STREAM
+!cpb original temporary grid storage
          open(9,file=cgrid,access='stream',form='unformatted')
 #else ! not GRID_STREAM
+!cpb new temporary grid storage
          open(9,file=cgrid,access='direct',recl=8,form='unformatted')
 #endif ! not GRID_STREAM
 
@@ -239,27 +241,38 @@
              end select
 
 #ifdef GRID_STREAM
+!cpb original temporary grid storage
              np=8*(je-js+1)*(ie-is+1)
              write(9,pos=np*k+1) ((xx(i,j),i=is,ie),j=js,je)
              write(9,pos=np*(k+lze0+1)+1) ((yy(i,j),i=is,ie),j=js,je)
              write(9,pos=np*(k+2*lze0+2)+1) ((zz(i,j),i=is,ie),j=js,je)
 #else ! not GRID_STREAM
+!cpb new temporary grid storage
+             !the coordinates are written in three blocks for x, y and z
+             !and respectively in an ijk-order
+
+             !get number of point per direction per block
              npi=(ie-is+1)
              npj=(je-js+1)
              npk=lze0+1
 
+             !write x-coordinate in ijk-order
              do j=1,npj
              do i=1,npi
                  reclen = (k)*npj*npi + (j-1)*npi + i
                  write(9,rec= reclen) xx(i+is-1,j+js-1)
              enddo
              enddo
+
+             !write y-coordinate in ijk-order
              do j=1,npj
              do i=1,npi
                  reclen = npk*npj*npi + (k)*npj*npi + (j-1)*npi + i
                  write(9,rec= reclen) yy(i+is-1,j+js-1)
              enddo
              enddo
+
+             !write z-coordinate in ijk-order
              do j=1,npj
              do i=1,npi
                  reclen =  2*npk*npj*npi + (k)*npj*npi + (j-1)*npi + i
