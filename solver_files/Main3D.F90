@@ -615,7 +615,7 @@
  if(nk.eq.1) then
     ! write subspaces
     call subspace_write_data(n,0)
-    if(myid.eq.0) write(*,*) 'Subspaces at timestep ',n,' and time ',timo,' written!'
+!    if(myid.eq.0) write(*,*) 'Subspaces at timestep ',n,' and time ',timo,' written!'
 endif
 #endif ! SUBSPACES
 !----- DETERMINATION OF TIME STEP SIZE & OUTPUT TIME

@@ -411,11 +411,11 @@
               ss_spec_block(ss_index,mb+1,5)).and. &
              (ss_spec_block(ss_index,mb+1,4).eq. &
                              letmb(mb+1)+1))  &
-                    ss_wall_opt(ss_index) = 1 
+                    ss_wall_opt(ss_index) = 1
           if ((ss_spec_block(ss_index,mb+1,4).eq. &
               ss_spec_block(ss_index,mb+1,5)).and. &
              (ss_spec_block(ss_index,mb+1,4).eq.1))  &
-                    ss_wall_opt(ss_index) = 2 
+                    ss_wall_opt(ss_index) = 2
           if ((ss_spec_block(ss_index,mb+1,1).eq. &
               ss_spec_block(ss_index,mb+1,2)).and. &
              (ss_spec_block(ss_index,mb+1,1).eq. &
@@ -731,7 +731,7 @@
           !write data in vector
           !loop over values
           l2=0
-          do ivar=1,5   !!cpb: this shall be 1-5 passive scalars are written with option 13 ! cds: general case
+          ivar=1
           !loop theta direction
           do k=ss_kstart,ss_kend,ss_kskip
           !loop eta direction
@@ -743,6 +743,32 @@
               ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),ivar))
             end do
           end do
+          end do
+          do ivar=2,4   !!cpb: this shall be 1-5 passive scalars are written with option 13 ! cds: general case
+          !loop theta direction
+          do k=ss_kstart,ss_kend,ss_kskip
+          !loop eta direction
+          do j=ss_jstart,ss_jend,ss_jskip
+            !loop xi direction
+            do i=ss_istart,ss_iend,ss_iskip
+              l2 = l2 + 1
+              ! Q=Q/J
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),ivar)+umf(ivar-1))
+            end do
+          end do
+          end do
+          end do
+          ivar=5
+          !loop theta direction
+          do k=ss_kstart,ss_kend,ss_kskip
+          !loop eta direction
+          do j=ss_jstart,ss_jend,ss_jskip
+            !loop xi direction
+            do i=ss_istart,ss_iend,ss_iskip
+              l2 = l2 + 1
+              ! Q=Q/J
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),ivar))
+            end do
           end do
           end do
         elseif (ss_opt(ss_index) .eq. 1) then
@@ -757,7 +783,7 @@
             do i=ss_istart,ss_iend,ss_iskip
               l2 = l2 + 1
               ! Q=Q/J
-              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qb(indx3(i-1,j-1,k-1,1),2)/qb(indx3(i-1,j-1,k-1,1),1)+umf(1))
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),1))
             end do
           end do
           end do
@@ -773,7 +799,7 @@
             do i=ss_istart,ss_iend,ss_iskip
               l2 = l2 + 1
               ! Q=Q/J
-              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),2))
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),2)+umf(1))
             end do
           end do
           end do
@@ -789,7 +815,7 @@
             do i=ss_istart,ss_iend,ss_iskip
               l2 = l2 + 1
               ! Q=Q/J
-              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),3))
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),3)+umf(2))
             end do
           end do
           end do
@@ -805,7 +831,7 @@
             do i=ss_istart,ss_iend,ss_iskip
               l2 = l2 + 1
               ! Q=Q/J
-              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),4))
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),4)+umf(3))
             end do
           end do
           end do
@@ -821,7 +847,7 @@
             do i=ss_istart,ss_iend,ss_iskip
               l2 = l2 + 1
               ! Q=Q/J
-              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),5))     
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),5))     
             end do
           end do
           end do
@@ -1075,7 +1101,7 @@
           blockdims_ijk, blockstart_ijk, MPI_ORDER_FORTRAN, &
           SS_MPI_PREC, subarray_ijk, ierr)
          call MPI_TYPE_COMMIT( subarray_ijk, ierr)
-  
+
 !cpb   ==================================================================
 !cpb                      OUTPUT IN PLOT 3D FORMAT
 !cpb   ==================================================================
@@ -1225,5 +1251,3 @@
 !cpb               END IO subroutine to write out subspaces
 !cpb   =================================================================
 !cpb   =================================================================
-
-

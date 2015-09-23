@@ -59,6 +59,9 @@
      read(9,*) cinput,tam(:,0)
      read(9,*) cinput,tam(:,1)
      read(9,*) cinput,cutlb
+#ifdef VORTEX_INIT
+     read(9,*) cinput,cf1,cf2,xcore
+#endif ! VORTEX_INIT
      close(9)
 
      ck1=2*pi*ck1; ck2=2*pi*ck2; ck3=2*pi*ck3
