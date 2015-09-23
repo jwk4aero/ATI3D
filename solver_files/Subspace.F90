@@ -847,7 +847,7 @@
             do i=ss_istart,ss_iend,ss_iskip
               l2 = l2 + 1
               ! Q=Q/J
-              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),5))     
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),5))
             end do
           end do
           end do
@@ -867,6 +867,85 @@
             end do
           end do
           end do
+      elseif(ss_opt(ss_index) .eq. 7) then
+          !write data in vector
+          !loop over values
+          l2=0
+          ivar=1
+          !loop theta direction
+          do k=ss_kstart,ss_kend,ss_kskip
+          !loop eta direction
+          do j=ss_jstart,ss_jend,ss_jskip
+            !loop xi direction
+            do i=ss_istart,ss_iend,ss_iskip
+              l2 = l2 + 1
+              ! Q=Q/J
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(qa(indx3(i-1,j-1,k-1,1),ivar))
+            end do
+          end do
+          end do
+          do ivar=2,4   !!cpb: this shall be 1-5 passive scalars are written with option 13 ! cds: general case
+          !loop theta direction
+          do k=ss_kstart,ss_kend,ss_kskip
+          !loop eta direction
+          do j=ss_jstart,ss_jend,ss_jskip
+            !loop xi direction
+            do i=ss_istart,ss_iend,ss_iskip
+              l2 = l2 + 1
+              ! Q=Q/J
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),ivar)+umf(ivar-1))
+            end do
+          end do
+          end do
+          end do
+          ivar=5
+          !loop theta direction
+          do k=ss_kstart,ss_kend,ss_kskip
+          !loop eta direction
+          do j=ss_jstart,ss_jend,ss_jskip
+            !loop xi direction
+            do i=ss_istart,ss_iend,ss_iskip
+              l2 = l2 + 1
+              ! Q=Q/J
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(p(indx3(i-1,j-1,k-1,1)))
+            end do
+          end do
+          end do
+          !dilatation
+
+
+    ss(:,1)=1/qa(:,1)
+
+    rr(:,1)=qa(:,2)*ss(:,1)
+    m=1; call mpigo(ntdrv,nrone,n45go,m); call deriv(3,1,m); call deriv(2,1,m); call deriv(1,1,m)
+    de(:,1)=yaco(:)*(rr(:,1)*xim(:,1)+rr(:,2)*etm(:,1)+rr(:,3)*zem(:,1)) ! du/dx
+
+    rr(:,1)=qa(:,3)*ss(:,1)
+    m=2; call mpigo(ntdrv,nrone,n45go,m); call deriv(3,1,m); call deriv(2,1,m); call deriv(1,1,m)
+    de(:,1)=de(:,1)+yaco(:)*(rr(:,1)*xim(:,2)+rr(:,2)*etm(:,2)+rr(:,3)*zem(:,2)) ! dv/dy
+
+    rr(:,1)=qa(:,4)*ss(:,1)
+    m=3; call mpigo(ntdrv,nrone,n45go,m); call deriv(3,1,m); call deriv(2,1,m); call deriv(1,1,m)
+    de(:,1)=de(:,1)+yaco(:)*(rr(:,1)*xim(:,3)+rr(:,2)*etm(:,3)+rr(:,3)*zem(:,3)) ! dw/dz
+
+
+
+
+
+          ivar=5
+          !loop theta direction
+          do k=ss_kstart,ss_kend,ss_kskip
+          !loop eta direction
+          do j=ss_jstart,ss_jend,ss_jskip
+            !loop xi direction
+            do i=ss_istart,ss_iend,ss_iskip
+              l2 = l2 + 1
+              ! Q=Q/J
+              ss_qio((ss_start-1)+l2) = SS_PREC_CONV(de(indx3(i-1,j-1,k-1,1),1))
+            end do
+          end do
+          end do
+
         else
           call stopnow('Subspace option not defined')
         endif
