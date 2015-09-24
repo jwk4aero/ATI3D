@@ -119,12 +119,21 @@
      ! setup boundary conditions
      ip=30*nthick+35*(1-nthick); jp=35*(1-nbody)+nbody*(20+5*nviscous)
      select case(mb)
+#ifndef ENDWALL
          case(0); nbcs(1)=10; nbce(1)=ip; nbcs(2)=10; nbce(2)=ip; nbcs(3)=45; nbce(3)=45
          case(1); nbcs(1)=ip; nbce(1)=ip; nbcs(2)=10; nbce(2)=jp; nbcs(3)=45; nbce(3)=45
          case(2); nbcs(1)=ip; nbce(1)=10; nbcs(2)=10; nbce(2)=35; nbcs(3)=45; nbce(3)=45
          case(3); nbcs(1)=10; nbce(1)=ip; nbcs(2)=ip; nbce(2)=10; nbcs(3)=45; nbce(3)=45
          case(4); nbcs(1)=ip; nbce(1)=ip; nbcs(2)=jp; nbce(2)=10; nbcs(3)=45; nbce(3)=45
          case(5); nbcs(1)=ip; nbce(1)=10; nbcs(2)=35; nbce(2)=10; nbcs(3)=45; nbce(3)=45
+#else ! ENDWALL
+         case(0); nbcs(1)=10; nbce(1)=ip; nbcs(2)=10; nbce(2)=ip; nbcs(3)=45; nbce(3)=45
+         case(1); nbcs(1)=ip; nbce(1)=ip; nbcs(2)=10; nbce(2)=jp; nbcs(3)=45; nbce(3)=45
+         case(2); nbcs(1)=ip; nbce(1)=10; nbcs(2)=10; nbce(2)=jp; nbcs(3)=45; nbce(3)=45
+         case(3); nbcs(1)=10; nbce(1)=ip; nbcs(2)=ip; nbce(2)=10; nbcs(3)=45; nbce(3)=45
+         case(4); nbcs(1)=ip; nbce(1)=ip; nbcs(2)=jp; nbce(2)=10; nbcs(3)=45; nbce(3)=45
+         case(5); nbcs(1)=ip; nbce(1)=10; nbcs(2)=jp; nbce(2)=10; nbcs(3)=45; nbce(3)=45
+#endif ! ENDWALL
      end select
 
      ! set neighboring block in x

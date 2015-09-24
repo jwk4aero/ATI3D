@@ -551,26 +551,45 @@
 
 !===== INITIAL CONDITIONS
 
- if(nts==0) then
-    n=0; ndt=0; dt=0; dts=0; dte=0; timo=0
-    call initialo
- else
-    open(9,file=crestart,access='stream',form='unformatted' OPENFILESHARED); lh=0
-    read(9,pos=8*lh+1) n; lh=lh+1
-    read(9,pos=8*lh+1) ndt; lh=lh+1
-    read(9,pos=8*lh+1) dt; lh=lh+1
-    read(9,pos=8*lh+1) dts; lh=lh+1
-    read(9,pos=8*lh+1) dte; lh=lh+1
-    read(9,pos=8*lh+1) timo; lh=lh+1
-    lp=lpos(myid)+lh
- do m=1,5; lq=(m-1)*ltomb
- do k=0,lze; do j=0,let; l=indx3(0,j,k,1)
-    read(9,pos=8*(lp+lq+lio(j,k))+1) qa(l:l+lxi,m)
- end do; end do
- end do
-    close(9)
- end if
-    qb(:,:)=0
+     if(nts==0) then
+         n=0; ndt=0; dt=0; dts=0; dte=0; timo=0
+         call initialo
+     else
+#ifdef RESTART_STREAM
+         open(9,file=crestart,access='stream',form='unformatted' OPENFILESHARED); lh=0
+         read(9,pos=8*lh+1) n; lh=lh+1
+         read(9,pos=8*lh+1) ndt; lh=lh+1
+         read(9,pos=8*lh+1) dt; lh=lh+1
+         read(9,pos=8*lh+1) dts; lh=lh+1
+         read(9,pos=8*lh+1) dte; lh=lh+1
+         read(9,pos=8*lh+1) timo; lh=lh+1
+         lp=lpos(myid)+lh
+         do m=1,5; lq=(m-1)*ltomb
+             do k=0,lze; do j=0,let; l=indx3(0,j,k,1)
+                 read(9,pos=8*(lp+lq+lio(j,k))+1) qa(l:l+lxi,m)
+             end do; end do
+         end do
+#else ! not RESTART_STREAM
+         open(9,file=crestart,access='direct',recl=8,form='unformatted' OPENFILESHARED); lh=1
+         read(9,rec=lh) n; lh=lh+1
+         read(9,rec=lh) ndt; lh=lh+1
+         read(9,rec=lh) dt; lh=lh+1
+         read(9,rec=lh) dts; lh=lh+1
+         read(9,rec=lh) dte; lh=lh+1
+         read(9,rec=lh) timo; lh=lh+1
+         lp=lpos(myid)+lh
+         do m=1,5; lq=(m-1)*ltomb
+             do k=0,lze; do j=0,let; l=indx3(0,j,k,1)
+                 do ll = l,l+lxi
+                     read(9,rec=lh) qa(ll,m); lh=lh+1
+                 end do
+             end do; end do
+         end do
+#endif ! not RESTART_STREAM
+         close(9)
+     end if
+
+     qb(:,:)=0
 
 !============================================
 !===== BEGINNING OF TIME MARCHING IN SOLUTION
@@ -969,6 +988,7 @@ endif
 !===== GENERATING RESTART DATA FILE
 
  if(nrestart==1) then
+#ifdef RESTART_STREAM
  if(myid==mo(mb)) then
     open(9,file=crestart); close(9,status='delete')
  end if
@@ -991,8 +1011,35 @@ endif
  end do; end do
  end do
     close(9)
+#else ! not RESTART_STREAM
+ if(myid==mo(mb)) then
+    open(9,file=crestart); close(9,status='delete')
+ end if
+     call MPI_BARRIER(icom,ierr)
+     open(9,file=crestart,access='direct',recl=8,form='unformatted' OPENFILESHARED); lh=1
+     if(myid==mo(mb)) then
+         write(9,rec=lh) n; lh=lh+1
+         write(9,rec=lh) ndt; lh=lh+1
+         write(9,rec=lh) dt; lh=lh+1
+         write(9,rec=lh) dts; lh=lh+1
+         write(9,rec=lh) dte; lh=lh+1
+         write(9,rec=lh) timo; lh=lh+1
+     else
+         lh=lh+6
+     end if
+     lp=lpos(myid)+lh
+     do m=1,5; lq=(m-1)*ltomb
+         do k=0,lze; do j=0,let; l=indx3(0,j,k,1)
+             do ll=l,l+lxi
+                 write(9,pos=lh) qa(ll,m); lh=lh+1
+             end do
+         end do; end do
+     end do
+     close(9)
+#endif ! not  RESTART_STREAM
  end if
 
+#ifndef SUBSPACES
 !===== POST-PROCESSING & GENERATING TECPLOT DATA FILE
 
  if(dt==0) then
@@ -1072,7 +1119,8 @@ endif
 !-----
 
  end if
-#ifdef SUBSPACES
+
+#else ! SUBSPACES
 !cpb   subspaces finalize
      do ss_index=1,ss_num
         if(ss_in_subspace(ss_index)) then

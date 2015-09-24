@@ -103,7 +103,11 @@
                      end do
                      xo=xp(lxis1+ll,n); sho=sum(xp(lxis1+ll-4:lxis1+ll,n)*(/3,-16,36,-48,25/))/12
                  end if
+#ifndef ENDWALL
                  ip=lxis1+ll; im=lxi1-ll; call gridf(xp(:,n),pxi,xo,xc,sho,she,lxit,im,ip)
+#else ! ENDWALL
+                 ip=lxis1+ll; im=lxi1-ll; call gridf(xp(:,n),pxi,xo,xc,sho,3*she,lxit,im,ip)
+#endif ! ENDWALL
                  do i=lxis1+ll+1,lxie1-1
                      yp(i,n)=ylagi(i,n)
                  end do
@@ -121,7 +125,11 @@
              if(k==0) then
                  lxisz=lxi2*(minloc(abs(xa+szth1-xp(0:lxi0,n)),1)-1)/lxi0; lp=ll
              end if
+#ifndef ENDWALL
              ip=lxis2; im=lxi2-lxisz; call gridf(xp(:,n),pxi,xc,xd,she,free,lxit,im,ip)
+#else ! ENDWALL
+             ip=lxis2; im=lxi2-lxisz; call gridf(xp(:,n),pxi,xc,xd,3*she,free,lxit,im,ip)
+#endif ! ENDWALL
              ip=ip+im; im=lxisz; call gridf(xp(:,n),pxi,xd,xe,pxi(ip),free,lxit,im,ip)
              do m=1,2
                  select case(m)
@@ -146,8 +154,13 @@
              else
                  tmpa=xb-rs; tmpb=xc+re
                  ip=0; im=lxi0; call gridf(xp(:,n),pxi,xa,tmpa,sho,2*shs,lxit,im,ip)
+#ifndef ENDWALL
                  ip=lxis1; im=lxi1; call gridf(xp(:,n),pxi,tmpa,tmpb,2*shs,she,lxit,im,ip)
                  ip=lxis2; im=lxi2-lxisz; call gridf(xp(:,n),pxi,tmpb,xd,she,free,lxit,im,ip)
+#else ! ENDWALL
+                 ip=lxis1; im=lxi1; call gridf(xp(:,n),pxi,tmpa,tmpb,2*shs,3*she,lxit,im,ip)
+                 ip=lxis2; im=lxi2-lxisz; call gridf(xp(:,n),pxi,tmpb,xd,3*she,free,lxit,im,ip)
+#endif ! ENDWALL
                  ip=ip+im; im=lxisz; call gridf(xp(:,n),pxi,xd,xe,pxi(ip),free,lxit,im,ip)
              end if
              do i=0,lxit
